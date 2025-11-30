@@ -47,3 +47,4 @@ async fn main() -> Result<()> {
         tokio::time::sleep(Duration::from_secs(interval)).await;
     }
 }
+// Rust Conky - System Monitor
