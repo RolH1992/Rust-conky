@@ -1,0 +1,9 @@
+update_interval = 2
+
+[[widgets]]
+widget_type = "cpu"
+position = [0, 0]
+
+[[widgets]]
+widget_type = "memory" 
+position = [0, 2]
