@@ -1,6 +1,4 @@
-use sysinfo::{
-    CpuRefreshKind, Disks, MemoryRefreshKind, Networks, ProcessRefreshKind, RefreshKind, System,
-};
+use sysinfo::{CpuRefreshKind, Disks, MemoryRefreshKind, Networks, System};
 
 pub struct SystemInfo {
     system: System,
@@ -10,12 +8,9 @@ pub struct SystemInfo {
 
 impl SystemInfo {
     pub fn new() -> Self {
-        let system = System::new_with_specifics(
-            RefreshKind::new()
-                .with_cpu(CpuRefreshKind::everything())
-                .with_memory(MemoryRefreshKind::everything())
-                .with_processes(ProcessRefreshKind::everything()),
-        );
+        let mut system = System::new();
+        system.refresh_cpu_specifics(CpuRefreshKind::everything());
+        system.refresh_memory_specifics(MemoryRefreshKind::everything());
 
         Self {
             system,
@@ -25,16 +20,22 @@ impl SystemInfo {
     }
 
     pub fn refresh(&mut self) {
-        self.system.refresh_cpu();
-        self.system.refresh_memory();
-        self.system.refresh_processes();
-        self.networks.refresh();
-        self.disks.refresh();
+        self.system
+            .refresh_cpu_specifics(CpuRefreshKind::everything());
+        self.system
+            .refresh_memory_specifics(MemoryRefreshKind::everything());
+        self.system.refresh_processes_specifics(
+            sysinfo::ProcessesToUpdate::All,
+            true,
+            sysinfo::ProcessRefreshKind::everything(),
+        );
+        self.networks.refresh(false);
+        self.disks.refresh(false);
     }
 
     // CPU
     pub fn cpu_usage(&self) -> f32 {
-        self.system.global_cpu_info().cpu_usage()
+        self.system.global_cpu_usage()
     }
 
     pub fn cpu_count(&self) -> usize {
@@ -81,7 +82,7 @@ impl SystemInfo {
             .iter()
             .map(|(pid, process)| {
                 (
-                    process.name().to_string(),
+                    process.name().to_string_lossy().to_string(),
                     pid.as_u32(),
                     process.cpu_usage(),
                     process.memory(),
