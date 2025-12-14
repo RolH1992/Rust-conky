@@ -1,9 +1,12 @@
-update_interval = 2
+# Basic configuration
+update_interval = 1
+output_format = "terminal"  # options: "terminal", "json"
 
+# Optional widgets configuration (if you want to use the widget system)
 [[widgets]]
 widget_type = "cpu"
 position = [0, 0]
 
 [[widgets]]
-widget_type = "memory" 
+widget_type = "memory"
 position = [0, 2]

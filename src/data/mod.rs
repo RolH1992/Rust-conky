@@ -1,3 +1,3 @@
 pub mod collectors;
 
-pub use collectors::SystemInfo;
+pub use collectors::{SystemData, SystemInfo};
