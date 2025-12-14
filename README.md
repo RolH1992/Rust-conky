@@ -26,3 +26,17 @@ A system monitor written in Rust, inspired by the original Conky.
 - cargo build --release
 - chmod +x conky.sh
 - ./conky.sh
+
+## ✨ Latest Improvements
+
+### Flicker-Free GUI
+The shell script GUI now uses advanced terminal control for smooth, flicker-free updates:
+- Minimal screen redraw with `tput` commands
+- Hidden cursor during display
+- Proper cleanup on exit
+- Color-coded sections with progress bars
+
+### Performance
+- Efficient data collection in Rust
+- JSON parsing optimized
+- 1-second real-time updates
