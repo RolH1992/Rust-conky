@@ -15,20 +15,30 @@ struct Cli {
 
     #[arg(short, long, help = "Output JSON format for shell script")]
     json: bool,
+
+    #[arg(long, help = "Use TUI interface (ratatui)")]
+    tui: bool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    if cli.json {
-        // For JSON mode, skip config loading entirely
-        launch_json_output(1).await?;
-    } else {
-        // For terminal mode, load config normally
-        let config = config::load_config(&cli.config).await?;
-        let update_interval = config.update_interval;
-        launch_terminal(update_interval).await?;
+    match (cli.json, cli.tui) {
+        (true, _) => {
+            // JSON mode for scripts
+            launch_json_output(1).await?;
+        }
+        (false, true) => {
+            // NEW: TUI mode with ratatui
+            launch_tui(&cli.config).await?;
+        }
+        (false, false) => {
+            // Legacy terminal mode (your current simple render)
+            let config = config::load_config(&cli.config).await?;
+            let update_interval = config.update_interval;
+            launch_terminal(update_interval).await?;
+        }
     }
 
     Ok(())
@@ -39,27 +49,17 @@ async fn launch_json_output(update_interval: u64) -> Result<()> {
 
     loop {
         system_info.refresh();
-
-        // Get all system data
         let system_data = data::SystemData::from(&system_info);
-
-        // Convert to JSON and output - ONLY JSON
         let json_output = serde_json::to_string(&system_data)?;
         println!("{}", json_output);
 
-        // Flush stdout
-        use std::io::{self, Write};
-        io::stdout().flush()?;
-
-        // Wait for next update
+        std::io::Write::flush(&mut std::io::stdout())?;
         tokio::time::sleep(Duration::from_secs(update_interval)).await;
     }
 }
 
 async fn launch_terminal(update_interval: u64) -> Result<()> {
     let mut system_info = data::SystemInfo::new();
-
-    // Clear screen only once at start
     render::clear_screen()?;
     println!(
         "🚀 Rust Conky System Monitor - Update every {}s - Ctrl+C to stop",
@@ -72,4 +72,16 @@ async fn launch_terminal(update_interval: u64) -> Result<()> {
         render::draw(&system_info)?;
         tokio::time::sleep(Duration::from_secs(update_interval)).await;
     }
+}
+
+// NEW: TUI mode function
+async fn launch_tui(config_path: &str) -> Result<()> {
+    // Load config to get update interval
+    let config = config::load_config(config_path).await?;
+    let update_interval = config.update_interval;
+
+    // Launch TUI using the new render::tui module
+    render::tui::launch_tui(update_interval).await?;
+
+    Ok(())
 }
