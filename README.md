@@ -2,7 +2,6 @@
 
 A modern Terminal User Interface (TUI) for ClamAV antivirus scans. This tool provides a real-time, interactive dashboard to monitor and control system-wide virus scans with ease.
 
-https://screenshot.png
 ✨ Features
 
     Real-time Scan Monitoring - Watch scans progress in real-time with live output
