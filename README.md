@@ -55,5 +55,3 @@ cd clam-tui
 
 # Build the release version
 cargo build --release
-
-# The binary will be at ./target/release/clam-tui
